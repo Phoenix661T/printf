@@ -1,1 +1,2 @@
-This repository printf used to answer the questions relating to the ALX project
+This repo printf used to answer the questions relating to the ALX project
+
