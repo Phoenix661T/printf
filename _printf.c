@@ -1,48 +1,85 @@
 #include "main.h"
+#include <stdlib.h>
+
+
 /**
- *_printf - function that produces output according to a format
- *@format: a string to be displayed in out
- *Return: the number of characters printed
+ * check_for_specifiers - checks if there is a valid format specifier
+ * @format: possible format specifier
+ *
+ * Return: pointer to valid function or NULL
+ */
+static int (*check_for_specifiers(const char *format))(va_list)
+{
+unsigned int i;
+print_t p[] = {
+{"c", print_c},
+{"s", print_s},
+{"i", print_i},
+{"d", print_d},
+{"u", print_u},
+{"b", print_b},
+{"o", print_o},
+{"x", print_x},
+{"X", print_X},
+{"p", print_p},
+{"S", print_S},
+{"r", print_r},
+{"R", print_R},
+{NULL, NULL}
+};
+
+for (i = 0; p[i].t != NULL; i++)
+{
+if (*(p[i].t) == *format)
+{
+break;
+}
+}
+return (p[i].f);
+
+}
+
+/**
+ * _printf - prints anything
+ * @format: list of argument types passed to the function
+ *
+ * Return: number of characters printed
  */
 int _printf(const char *format, ...)
 {
-unsigned int i = 0, flag, l = 0, st_len = 0, nb1 = 0, nb2 = 0;
-char special_char  = '%';
-va_list ap;
+unsigned int i = 0, count = 0;
+va_list valist;
+int (*f)(va_list);
 
-va_start(ap, format);
-while (format && *(format + i))
-{
-flag = 1;
-
-if (format[i] == special_char && format[i + 1] == '\0')
-{
+if (format == NULL)
 return (-1);
-}
-else if (format[i] == special_char &&
-(format[i + 1] == special_char || format[i + 1] == '\0'))
+
+va_start(valist, format);
+while (format[i])
 {
-_putchar('%');
-nb1++;
-flag = 0;
-i++;
-}
-else if (format[i] == special_char && format[i + 1] != '\0'
-&& get_op_func(format[i + 1]) != NULL)
+for (; format[i] != '%' && format[i]; i++)
 {
-nb2++;
-flag = 0;
-l = (get_op_func(format[i + 1]))(ap);
-st_len += l;
-i++;
-}
-if (flag)
 _putchar(format[i]);
-if (format[i] != '\0')
+count++;
+}
+if (!format[i])
+return (count);
+f = check_for_specifiers(&format[i + 1]);
+if (f != NULL)
+{
+count += f(valist);
+i += 2;
+continue;
+}
+if (!format[i + 1])
+return (-1);
+_putchar(format[i]);
+count++;
+if (format[i + 1] == '%')
+i += 2;
+else
 i++;
 }
-va_end(ap);
-if (!format)
-return (-1);
-return (i - (nb1 + 2 * nb2) + st_len);
+va_end(valist);
+return (count);
 }
